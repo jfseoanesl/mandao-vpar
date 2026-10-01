@@ -1,0 +1,20 @@
+mandao:
+  jobs:
+    enabled: false
+  routing:
+    enabled: false
+  storage:
+    type: local
+    local-dir: target/test-files
+  security:
+    cookie-secure: false
+  seed-demo: false
+  push:
+    # El IT recibe los push en un servidor HTTP local.
+    allowed-hosts: [fcm.googleapis.com, 127.0.0.1]
+    allow-http: true
+
+logging:
+  level:
+    org.testcontainers: WARN
+    com.github.dockerjava: WARN

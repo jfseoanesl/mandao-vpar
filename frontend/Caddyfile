@@ -1,0 +1,60 @@
+# Opciones globales solo para la red local (vacías en producción, donde se mantiene la redirección a HTTPS):
+#   CADDY_DEFAULT_SNI="default_sni 192.168.1.50"   → los navegadores no envían SNI al conectar por IP
+#   CADDY_AUTO_HTTPS="auto_https disable_redirects" → el certificado de la CA local se puede bajar por HTTP
+{
+	{$CADDY_DEFAULT_SNI}
+	{$CADDY_AUTO_HTTPS}
+}
+
+# Punto de entrada único. SITE_ADDRESS (una o varias direcciones separadas por coma):
+#   ":80"                                   → local por HTTP (docker compose en tu PC)
+#   ":80, https://192.168.1.50:8443"        → además HTTPS en la red local (CA interna de Caddy) para probar en el celular
+#   "app.mandao.co"                         → producción: Caddy obtiene y renueva el certificado HTTPS solo
+{$SITE_ADDRESS::80} {
+	encode zstd gzip
+
+	# API y WebSocket al backend (no se exponen al exterior por otro puerto).
+	handle /api/* {
+		reverse_proxy {$BACKEND:backend:8080}
+	}
+	handle /ws* {
+		reverse_proxy {$BACKEND:backend:8080}
+	}
+	# Swagger solo si el backend lo habilita (SWAGGER_ENABLED).
+	handle /swagger-ui* {
+		reverse_proxy {$BACKEND:backend:8080}
+	}
+	handle /v3/api-docs* {
+		reverse_proxy {$BACKEND:backend:8080}
+	}
+
+	# Red local: certificado raíz de la CA interna de Caddy, para instalarlo en el celular de pruebas.
+	# Es público por naturaleza (no contiene la llave privada); en producción no existe y responde 404.
+	handle /mandao-local-ca.crt {
+		root * /data/caddy/pki/authorities/local
+		rewrite * /root.crt
+		header Content-Type application/x-x509-ca-cert
+		file_server
+	}
+
+	# PWA: archivos con hash se cachean un año; index y service worker nunca.
+	handle {
+		root * /srv
+		@hashed path_regexp \.[0-9a-f]{8,}\.(js|css)$|-[A-Z0-9]{8}\.(js|css)$
+		header @hashed Cache-Control "public, max-age=31536000, immutable"
+		@nocache path /index.html /ngsw.json /ngsw-worker.js /manifest.webmanifest
+		header @nocache Cache-Control "no-cache"
+		try_files {path} /index.html
+		file_server
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "geolocation=(self), camera=(self), microphone=()"
+		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://tile.openstreetmap.org; connect-src 'self' ws: wss: https://nominatim.openstreetmap.org https://tile.openstreetmap.org https://fonts.googleapis.com https://fonts.gstatic.com; worker-src 'self'; manifest-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+		-Server
+	}
+}

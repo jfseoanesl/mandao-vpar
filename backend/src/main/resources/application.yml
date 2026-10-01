@@ -1,0 +1,78 @@
+spring:
+  application:
+    name: mandao
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/mandao}
+    username: ${DB_USER:mandao}
+    password: ${DB_PASSWORD:mandao}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate.jdbc.time_zone: UTC
+  flyway:
+    enabled: true
+  servlet:
+    multipart:
+      max-file-size: 8MB
+      max-request-size: 10MB
+  jackson:
+    default-property-inclusion: non_null
+
+server:
+  port: ${PORT:8080}
+  forward-headers-strategy: framework
+  error:
+    include-message: never
+    include-stacktrace: never
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+springdoc:
+  swagger-ui:
+    enabled: ${SWAGGER_ENABLED:true}
+
+mandao:
+  security:
+    # HS256: mínimo 32 bytes. En producción SIEMPRE por variable de entorno.
+    jwt-secret: ${JWT_SECRET:dev-only-secret-change-me-please-32bytes!!}
+    access-token-minutes: 15
+    refresh-token-days: 30
+    # Frase secreta de la que se deriva (SHA-256) la clave AES-256 que cifra los OTP en reposo.
+    otp-key: ${OTP_KEY:dev-only-otp-passphrase-change-me}
+    cookie-secure: ${COOKIE_SECURE:true}
+    cors-origins: ${CORS_ORIGINS:http://localhost:4200}
+  storage:
+    type: ${STORAGE_TYPE:local}
+    local-dir: ${STORAGE_DIR:./data/files}
+    s3-endpoint: ${S3_ENDPOINT:http://localhost:9000}
+    s3-access-key: ${S3_ACCESS_KEY:mandao}
+    s3-secret-key: ${S3_SECRET_KEY:mandao-secret}
+    s3-bucket: ${S3_BUCKET:mandao-files}
+  routing:
+    osrm-url: ${OSRM_URL:https://router.project-osrm.org}
+    enabled: ${ROUTING_ENABLED:true}
+  service-area:
+    center-lat: 10.4631
+    center-lng: -73.2532
+    radius-km: 30
+  contact:
+    whatsapp: ${WHATSAPP_NUMBER:573000000000}
+  bootstrap-admin:
+    phone: ${ADMIN_PHONE:}
+    password: ${ADMIN_PASSWORD:}
+    name: ${ADMIN_NAME:Operador Mandao}
+  seed-demo: ${SEED_DEMO:false}
+  jobs:
+    enabled: ${JOBS_ENABLED:true}
+  push:
+    public-key: ${VAPID_PUBLIC_KEY:}
+    private-key: ${VAPID_PRIVATE_KEY:}
+    subject: ${VAPID_SUBJECT:mailto:soporte@mandao.co}
+    allowed-hosts: [fcm.googleapis.com, updates.push.services.mozilla.com, .push.apple.com, .notify.windows.com]
+    allow-http: false
