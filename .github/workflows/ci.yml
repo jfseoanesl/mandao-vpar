@@ -24,7 +24,7 @@ jobs:
       - run: mvn -B verify
         working-directory: backend
       - if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: backend-test-reports
           path: |
@@ -72,7 +72,7 @@ jobs:
         run: docker compose logs --no-color backend | tail -200
         working-directory: infra
       - if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with: { name: playwright-report, path: frontend/playwright-report }
 
   dependency-check:
@@ -88,5 +88,5 @@ jobs:
           path: '.'
           format: HTML
           args: --failOnCVSS 9 --exclude "**/node_modules/**"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with: { name: dependency-check-report, path: reports }
