@@ -29,7 +29,7 @@
     "@angular-devkit/build-angular": "^18.2.21",
     "@angular/cli": "^18.2.21",
     "@angular/compiler-cli": "^18.2.0",
-    "@playwright/test": "1.48",
+    "@playwright/test": "1.63",
     "@types/jasmine": "~5.1.0",
     "@types/leaflet": "1.9",
     "jasmine-core": "~5.2.0",
