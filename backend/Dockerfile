@@ -7,7 +7,7 @@ COPY src ./src
 RUN mvn -q -B -DskipTests package && cp target/mandao-backend-*.jar /app.jar
 
 # --- Ejecución ---
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:25-jre-alpine
 RUN addgroup -S mandao && adduser -S mandao -G mandao && mkdir -p /data/files && chown -R mandao:mandao /data
 USER mandao
 WORKDIR /app
