@@ -19,7 +19,7 @@
     <properties>
         <java.version>21</java.version>
         <springdoc.version>2.6.0</springdoc.version>
-        <minio.version>8.5.12</minio.version>
+        <minio.version>9.0.3</minio.version>
     </properties>
 
     <dependencies>
